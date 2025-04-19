@@ -40,7 +40,8 @@ import LinkTool, { DefaultLinkToolRender } from "@yoopta/link-tool";
 
 // import { uploadToCloudinary } from "@/utils/cloudinary";
 import { useMemo, useRef, useState } from "react";
-import NotionToolbar from "./Toolbar";
+import { Button } from "./ui/button";
+import { SubmitBlogDialog } from "./SubmitBlogDialog";
 
 const plugins = [
   Paragraph,
@@ -555,6 +556,8 @@ function TextEditor() {
     setValue(newValue);
   };
 
+  const [openForm, setOpenForm] = useState<boolean>(false)
+
   return (
     <div className="px-44 py-10 flex" ref={selectionRef}>
       <YooptaEditor
@@ -567,6 +570,8 @@ function TextEditor() {
         onChange={onChange}
         autoFocus
       />
+      <SubmitBlogDialog editor={editor} openForm={openForm} setOpenForm={setOpenForm}/>
+      <Button onClick={() => {setOpenForm(true)}}>Mint Blog</Button>
     </div>
   );
 }
