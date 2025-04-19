@@ -14,6 +14,9 @@ contract BlogToken is ERC721, ERC721URIStorage, Ownable {
         Ownable(initialOwner)
     {}
 
+    //events for this contract
+    event BlogMinted(address indexed owner, uint tokenId, uint256 timestamp, string ipfsURI);
+
     function _baseURI() internal pure override returns (string memory) {
         return "ipfs://";
     }
@@ -30,6 +33,10 @@ contract BlogToken is ERC721, ERC721URIStorage, Ownable {
     }
 
     // The following functions are overrides required by Solidity.
+    function mint(address to, string memory uri) public {
+        uint tokenId = safeMint(to, uri);
+        emit BlogMinted(to, tokenId, block.timestamp, uri);
+    }
 
     function tokenURI(uint256 tokenId)
         public
