@@ -1,4 +1,4 @@
-"only server"
+import "server-only"
 
 import { PinataSDK } from "pinata"
 
