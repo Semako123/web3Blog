@@ -30,7 +30,7 @@ export const createBlog = async (
     // return res
 
     const metadata = {
-      title: safeTitle,
+      title: title,
       description: formData.get("description"),
       author: address,
       tags: tags,
