@@ -24,6 +24,8 @@ import { useAccount, useWriteContract } from "wagmi";
 import BlogTokenABI from "@/abi/BlogToken.json";
 import { UploadResponse } from "pinata";
 import { Abi } from "viem";
+import { getMetadata, uploadMetadata } from "@/app/api/db/db_actions";
+import { blogMetadata } from "@/app/types";
 
 type submitProps = {
   editor: YooEditor;
@@ -68,7 +70,10 @@ const SubmitForm = ({ editor }: { editor: YooEditor }) => {
     const formData = new FormData(e.currentTarget);
 
     try {
-      const res = await createBlog(
+      const {
+        blogCID,
+        metadata,
+      }: { blogCID: UploadResponse; metadata: blogMetadata } = await createBlog(
         tags,
         address!,
         editorJSON,
@@ -76,16 +81,15 @@ const SubmitForm = ({ editor }: { editor: YooEditor }) => {
         formData
       );
 
-      console.log(res);
-
       const transactionRes = await writeContractAsync({
         abi: BlogTokenABI,
         address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         functionName: "mint",
-        args: [address!, (res as UploadResponse).cid],
+        args: [address!, blogCID.cid],
       });
 
-      console.log(transactionRes);
+      await uploadMetadata(metadata)
+      await getMetadata();
     } catch (error) {
       console.log(error);
     }
