@@ -3,8 +3,21 @@ type blogMetadata = {
     description: FormDataEntryValue | null;
     author: `0x${string}`;
     tags: string[];
-    content: string;
+    content_cid: string;
     timestamp: number;
 }
 
-export {type blogMetadata}
+type blogSchema = blogMetadata & {
+    id: string;
+    likes: number;
+}
+
+type BlogMintedEvent = {
+  owner: `0x${string}`;
+  tokenId: bigint;
+  timestamp: bigint;
+  ipfsURI: string;
+};
+
+
+export {type blogMetadata, type blogSchema, type BlogMintedEvent}
