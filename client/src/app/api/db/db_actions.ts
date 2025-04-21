@@ -1,10 +1,11 @@
 import db from "../../../db/firebase";
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
-import { blogMetadata } from "@/app/types";
+import { collection, query, where, getDocs, addDoc, doc, setDoc } from "firebase/firestore";
+import { blogMetadata, blogSchema } from "@/app/types";
 
-const uploadMetadata = async (metadata: blogMetadata) => {
-  const ref = await addDoc(collection(db, "metadata"), metadata);
-  console.log("new metadata added at", ref);
+const uploadMetadata = async (blogData: blogSchema) => {
+  const docRef =  doc(db, "blogs", blogData.id)
+  await setDoc(docRef, blogData);
+  console.log("new blog added at", docRef);
 };
 
 const getMetadata = async () => {
