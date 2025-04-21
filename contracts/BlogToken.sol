@@ -33,9 +33,10 @@ contract BlogToken is ERC721, ERC721URIStorage, Ownable {
     }
 
     // The following functions are overrides required by Solidity.
-    function mint(address to, string memory uri) public {
+    function mint(address to, string memory uri) public returns (uint) {
         uint tokenId = safeMint(to, uri);
         emit BlogMinted(to, tokenId, block.timestamp, uri);
+        return tokenId; 
     }
 
     function tokenURI(uint256 tokenId)

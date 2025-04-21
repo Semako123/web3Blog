@@ -1,6 +1,8 @@
 "use server";
 
 import { pinata } from "@/services/pinataService";
+import { UploadResponse } from "pinata";
+import { blogMetadata } from "../types";
 
 type address = `0x${string}`;
 
@@ -10,15 +12,18 @@ export const createBlog = async (
   editorJSON: string,
   editorMarkdown: string,
   formData: FormData
-) => {
+):Promise<{blogCID:UploadResponse, metadata:blogMetadata}> => {
+
+  //TODO: Move validation to frontend
   const firstLineWithHash = editorMarkdown.split("\n")[0];
-  if (firstLineWithHash[0] !== "#") {
-    return Error("Tile must be written with headidng 1");
-  }
+  // if (firstLineWithHash[0] !== "#") {
+  //   return Error("Tile must be written with headidng 1");
+  // }
   const title = firstLineWithHash?.slice(2).trim();
-  if (title?.length == 0) {
-    return Error("Invalid title");
-  }
+  // if (title?.length == 0) {
+  //   return Error("Invalid title");
+  // }
+
   const safeTitle = title?.replace(/[^a-z0-9_\-]/gi, "_");
 
   const file = new File([editorJSON], `${safeTitle!}.json`, {
@@ -30,11 +35,11 @@ export const createBlog = async (
     // return res
 
     const metadata = {
-      title: safeTitle,
+      title: title,
       description: formData.get("description"),
       author: address,
       tags: tags,
-      content: res.cid,
+      content_cid: res.cid,
       timestamp: Date.now(),
     };
 
@@ -43,10 +48,11 @@ export const createBlog = async (
       `_${safeTitle}.json`,
       { type: "application/json" }
     );
+
     const blogCID = await pinata.upload.public.file(metadataFile);
-    return blogCID
+    return {blogCID, metadata}
 
   } catch (error) {
-    return error as Error;
+    throw error as Error;
   }
 };

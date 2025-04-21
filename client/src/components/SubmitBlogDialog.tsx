@@ -20,10 +20,18 @@ import {
 } from "react";
 import TagInput from "./TagInput";
 import { Textarea } from "./ui/textarea";
-import { useAccount, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import BlogTokenABI from "@/abi/BlogToken.json";
 import { UploadResponse } from "pinata";
-import { Abi } from "viem";
+import { Abi, decodeEventLog, parseEventLogs } from "viem";
+import { getMetadata, uploadMetadata } from "@/app/api/db/db_actions";
+import { blogMetadata, BlogMintedEvent } from "@/app/types";
+import { waitForTransactionReceipt } from "@wagmi/core";
+import { config } from "@/services/wagmi/config";
 
 type submitProps = {
   editor: YooEditor;
@@ -68,7 +76,10 @@ const SubmitForm = ({ editor }: { editor: YooEditor }) => {
     const formData = new FormData(e.currentTarget);
 
     try {
-      const res = await createBlog(
+      const {
+        blogCID,
+        metadata,
+      }: { blogCID: UploadResponse; metadata: blogMetadata } = await createBlog(
         tags,
         address!,
         editorJSON,
@@ -76,16 +87,34 @@ const SubmitForm = ({ editor }: { editor: YooEditor }) => {
         formData
       );
 
-      console.log(res);
-
-      const transactionRes = await writeContractAsync({
+      const txhash = await writeContractAsync({
         abi: BlogTokenABI,
         address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         functionName: "mint",
-        args: [address!, (res as UploadResponse).cid],
+        args: [address!, blogCID.cid],
       });
 
-      console.log(transactionRes);
+      const txreceipt = await waitForTransactionReceipt(config, {
+        hash: txhash,
+      });
+
+      const logs = parseEventLogs({
+        abi: BlogTokenABI as Abi,
+        logs: txreceipt.logs,
+      });
+
+      const { args } = logs[2];
+
+      // Now args is already correct
+      const { tokenId } = args as BlogMintedEvent;
+      const blogData = {
+        ...metadata,
+        id: tokenId.toString(),
+        likes: 0,
+      };
+
+      await uploadMetadata(blogData);
+      await getMetadata();
     } catch (error) {
       console.log(error);
     }
