@@ -39,7 +39,7 @@ export const createBlog = async (
       description: formData.get("description"),
       author: address,
       tags: tags,
-      content: res.cid,
+      content_cid: res.cid,
       timestamp: Date.now(),
     };
 
