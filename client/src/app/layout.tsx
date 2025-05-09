@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import WagmiProvider from "@/context/WagmiProvider";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const interSans = Inter({
   variable: "--font-inter-sans",
@@ -21,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${interSans.variable} antialiased`}>
+      <body className={`${interSans.variable} antialiased p-2`}>
         <WagmiProvider>
           <ThemeProvider
             attribute="class"
@@ -29,7 +31,11 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <>
+              <Navbar />
+              {children}
+              <Footer />
+            </>
           </ThemeProvider>
         </WagmiProvider>
       </body>
